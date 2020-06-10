@@ -1,3 +1,3 @@
-kilo: kilo.c
-	gcc kilo.c -o kilo -Wall -Wextra -pedantic -std=c99
+editor: editor.c
+	gcc editor.c -o editor -Wall -Wextra -pedantic -std=c99
 
