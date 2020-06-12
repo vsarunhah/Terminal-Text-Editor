@@ -14,6 +14,7 @@
 #include <time.h>
 #include <stdarg.h>
 #include <fcntl.h>
+#include <dirent.h>
 
 /*** definitions ***/
 
@@ -310,6 +311,7 @@ void editorDelRow(int at) {
 
 /*** editor ops ***/
 
+//adds new line to the editor.
 void editorInsertNewline() {
     if (E.cx == 0) {
         editorInsertRow(E.cy, "", 0);
@@ -397,6 +399,18 @@ void editorSave() {
 
     if (E.filename == NULL) {
         E.filename = editorPrompt("Save as: %s (ESC to cancel)");
+        DIR *d;
+        struct dirent *dir;
+        d = opendir(".");
+        if (d) {
+            while ((dir = readdir(d)) != NULL) {
+                if (strcmp(E.filename, dir->d_name) == 0) {
+                    editorSetStatusMessage("A file with the name %s exists. Could not save.", E.filename);
+                    E.filename = NULL;
+                    return;
+                }
+            }
+        }
         if (E.filename == NULL) {
             editorSetStatusMessage("Save aborted");
             return;
@@ -432,6 +446,7 @@ struct abuf {
 
 #define ABUF_INIT {NULL, 0}
 
+//appends to the buffer
 void abAppend(struct abuf *ab, const char *s, int len) {
     char *new = realloc(ab->b, ab->len + len);
 
@@ -441,6 +456,7 @@ void abAppend(struct abuf *ab, const char *s, int len) {
     ab->len += len;
 }
 
+//frees buffer
 void abFree(struct abuf *ab) {
     free(ab->b);
 }
@@ -705,6 +721,7 @@ void editorSetStatusMessage(const char *fmt, ...) {
 
 /*** init ***/
 
+//sets up everything
 void initEditor() {
     E.cx = 0;
     E.cy = 0;
@@ -721,6 +738,7 @@ void initEditor() {
     E.screenrows -= 2;
 }
 
+//main function
 int main(int argc, char *argv[]) {
     enableRawMode();
     initEditor();
